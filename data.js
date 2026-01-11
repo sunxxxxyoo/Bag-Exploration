@@ -43,13 +43,9 @@ In truth, the greatest function of a mint is as an ice-breaker. Offering a mint 
         id: "med",   
         w: 69,  
         h: 50,  
-        title: "Medicine Pouch", 
+        title: "Digestive Medicine", 
         desc: `
-            This small pouch is my "just in case" survival kit. As someone who suffers from frequent headaches and occasional allergies, I realized early on that being prepared is half the battle. Inside, you'll find a carefully organized assortment of painkillers, allergy medication, band-aids, and even a small alcohol wipe.
-            
-            It gives me a sense of security knowing that I can handle minor health inconveniences without having to rush to a pharmacy. The pouch itself is made of waterproof fabric, so the contents stay safe even if my water bottle leaks inside my bag. 
-            
-            My friends often call me the "walking pharmacy" because I'm always the one who has a band-aid when someone gets a paper cut. It might seem like overkill to carry this every day, but on the days when I or someone else needs it, it feels like the most valuable item in my bag. It represents my desire to care for myself and others.
+            Strangely enough, I frequently find myself in need of digestive aids. It isn't just me; those around me also seem to constantly struggle with indigestion. If I stash a few packets in my bag, they are typically gone within two weeks. I often wonder—is this a symptom specific to Korean society, or a broader issue of modern life in general? My digestive system tends to shut down under stress. Whenever I face a major task or feel nervous, I instantly feel a sensation of blockage in my stomach. Yet, simply carrying the medicine provides a sense of security, knowing I have a remedy at hand to manage my condition.
         ` 
     },
     { 
@@ -111,12 +107,10 @@ Some cite the lack of noise cancellation—considered a necessity in modern soci
         h: 75,  
         title: "Digital Camera", 
         desc: `
-            In an age where everyone has a high-quality camera in their smartphone, carrying a bulky film camera might seem outdated. But I love the process of film photography. It forces me to slow down. With only 36 shots per roll, I have to be intentional about what I capture. I can't just snap a hundred photos and hope one turns out well.
+            Photography is the most convenient and compelling way to preserve a memory. In an era dominated by advanced smartphone cameras, I still insist on using a digital camera from 20 years ago because of the specific texture of light that only lenses from that era can capture. I love the grainy noise of an old lens more than the polished, sleek light rendered by an iPhone. Additionally, digital cameras offer far more control than phones. Adjusting settings to match the subject, location, weather, and lighting is a small joy of mine. I view this entire process as the perfect attempt to capture "light," an otherwise elusive entity.
             
-            The weight of the camera in my hand feels real and mechanical. I love the sound of the shutter clicking and the manual winding lever. It captures light and colors in a way that digital filters simply cannot replicate—there's a warmth and graininess that evokes nostalgia.
-            
-            The delayed gratification is the best part. Waiting weeks to finish a roll and get it developed adds a layer of anticipation. When I finally see the photos, I often rediscover moments I had forgotten about. It helps me document my life not for instant likes on social media, but for the sake of memory itself.
-        ` 
+            There was a time when I disliked taking photos, fearing that focusing on the shot meant neglecting the moment itself. Even now, I sometimes question if I am too fixated on documenting images. However, memories are not eternal. Capturing even a single photo allows me to revisit a forgotten moment when I encounter that image later in time. The key to capturing a great image lies in balancing two things: preserving the past in a curated texture and remaining faithful to the present.
+                    ` 
     },
     { 
         id: "connect",   
