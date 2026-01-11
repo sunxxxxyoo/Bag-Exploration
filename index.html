@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Bag Exploration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        /* 스타일 (UI 디자인) */
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(-45deg, #716FA6, #D0D9F2, #77DCF2, #F2CEA2, #F2DAC4);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 인트로 오버레이 */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 200; cursor: pointer;
+            transition: transform 1.5s ease-in-out, opacity 1.5s ease-in-out;
+            transform-origin: center center;
+        }
+
+        #intro-bag {
+            width: 300px; height: auto; margin-bottom: 10px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+        }
+
+        /* [수정됨] 텍스트를 타이틀처럼 보이게 하는 스타일 */
+        #intro-text-title {
+            font-size: 2.5rem;        /* 글자 크기 키움 */
+            font-weight: 700;       /* 글자 굵게 */
+            color: #333;            /* 진한 회색 */
+            margin-top: 20px;       /* 가방과의 간격 */
+            margin-bottom: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 텍스트 그림자 */
+            letter-spacing: -1px;   /* 자간 조절 */
+        }
+
+        /* 클릭 후 스타일 */
+        #intro-overlay.zoom-out {
+            transform: scale(5); opacity: 0; pointer-events: none;
+        }
+
+        /* 팝업창 */
+        #info-box {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px; border-radius: 0px;
+            box-shadow: 0 10px 10px rgba(0,0,0,0.15);
+            border: solid #333 1px; /* 콤마(,) 제거됨 */
+            width: 300px; max-height: 400px; overflow-y: auto;
+            display: none; z-index: 100;
+            font-size: 0.9rem; word-break: keep-all;   
+        }
+        #info-box h2 { margin: 0 0 4px 0; color: #333; font-size: 1rem; text-transform: capitalize; }
+        #info-box p { color: #555; line-height: 1.6; margin-bottom: 5px; }
+        #info-box::-webkit-scrollbar { width: 8px;}
+        #info-box::-webkit-scrollbar-thumb { background: #ccc; border-radius: 0px; }
+    </style>
+    
+</head>
+<body>
+
+    <div id="intro-overlay">
+        <img src="img/bag.png" alt="My Bag" id="intro-bag">
+        
+        <h1 id="intro-text-title">Click to Explore</h1>
+    </div>
+
+    <div id="info-box">
+        <h2 id="info-title">제목</h2>
+        <p id="info-desc">설명 내용</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script src="data.js"></script> 
+
+    <script>
+        // 1. 기본 설정
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        camera.position.set(0, 0, 20); // 인트로 위치
+        const targetCameraZ = 3; // 줌인 목표 위치
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.enabled = false; 
+
+        // 인트로 상태를 관리하는 변수
+        let isIntroFinished = false;
+
+        const introOverlay = document.getElementById('intro-overlay');
+        
+        introOverlay.addEventListener('click', () => {
+            introOverlay.classList.add('zoom-out');
+
+            gsap.to(camera.position, {
+                z: targetCameraZ,
+                duration: 1.5,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    controls.enabled = true;
+                    isIntroFinished = true; // 애니메이션 끝나면 "끝났다"고 표시
+                }
+            });
+
+            // 아이템 페이드 인
+            clickableObjects.forEach(group => {
+                group.children.forEach(mesh => {
+                    gsap.to(mesh.material, {
+                        opacity: 1,
+                        duration: 1.5,
+                        ease: "power1.in"
+                    });
+                });
+            });
+        });
+
+        // 2. 조명 설정
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        mainLight.position.set(5, 5, 5);
+        scene.add(mainLight);
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        fillLight.position.set(-5, 3, 5);
+        scene.add(fillLight);
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        backLight.position.set(0, 5, -5);
+        scene.add(backLight);
+
+        // 3. 물건 배치
+        const scaleFactor = 0.02;
+        const placedItems = [];
+        const clickableObjects = [];
+        const loader = new THREE.TextureLoader();
+
+        function findValidPosition(width, height) {
+            const margin = 0.05; 
+            let attempts = 0; let maxAttempts = 200; 
+            const rangeX = 8; const rangeY = 6;
+            while(attempts < maxAttempts) {
+                const x = (Math.random() - 0.5) * rangeX;
+                const y = (Math.random() - 0.5) * rangeY;
+                let collision = false;
+                for (let item of placedItems) {
+                    const xOverlap = Math.abs(x - item.x) < (width + item.w)/2 + margin;
+                    const yOverlap = Math.abs(y - item.y) < (height + item.h)/2 + margin;
+                    if (xOverlap && yOverlap) collision = true; break;
+                }
+                if (!collision) return { x: x, y: y };
+                attempts++;
+            }
+            return { x: (Math.random() - 0.5) * rangeX, y: (Math.random() - 0.5) * rangeY };
+        }
+
+        function createItem(itemData) {
+            const group = new THREE.Group();
+            const width = itemData.w * scaleFactor;
+            const height = itemData.h * scaleFactor;
+            const position = findValidPosition(width, height);
+            placedItems.push({ x: position.x, y: position.y, w: width, h: height });
+            
+            const materialParams = { 
+                transparent: true, side: THREE.FrontSide, alphaTest: 0.5, color: 0xffffff,
+                opacity: 0 // 초기값 투명
+            };
+
+            const frontUrl = `img/${itemData.id}_f.png`;
+            const backUrl  = `img/${itemData.id}_b.png`;
+            
+            const frontMesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshStandardMaterial({ ...materialParams, map: loader.load(frontUrl) }));
+            frontMesh.position.z = 0.005;
+            
+            const backMesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshStandardMaterial({ ...materialParams, color: 0xeeeeee, map: loader.load(backUrl) }));
+            backMesh.rotation.y = Math.PI; backMesh.position.z = -0.005;
+            
+            group.add(frontMesh); group.add(backMesh);
+            group.position.set(position.x, position.y, (Math.random() - 0.5) * 0.5); 
+            group.rotation.z = (Math.random() - 0.5) * 1.5; 
+            group.userData = { title: itemData.title, description: itemData.desc };
+            group.userData.rotSpeed = (Math.random() * 0.01) + 0.005; 
+            scene.add(group); clickableObjects.push(group); 
+        }
+
+        if (typeof myItems === 'undefined') {
+            alert("⚠️ 오류: data.js 파일을 찾을 수 없습니다.");
+        } else {
+            myItems.sort(() => Math.random() - 0.5);
+            myItems.forEach((item) => createItem(item));
+        }
+
+        // 5. 클릭 감지 (이 부분에 정렬 로직 적용됨)
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function isTransparent(intersect) {
+            const uv = intersect.uv;
+            const material = intersect.object.material;
+            const texture = material.map;
+            if (!texture || !texture.image) return false;
+            const image = texture.image;
+            const canvas = document.createElement('canvas');
+            canvas.width = 1; canvas.height = 1;
+            const context = canvas.getContext('2d');
+            const x = Math.floor(uv.x * image.width);
+            const y = Math.floor((1 - uv.y) * image.height);
+            context.drawImage(image, x, y, 1, 1, 0, 0, 1, 1);
+            const pixel = context.getImageData(0, 0, 1, 1).data;
+            return pixel[3] < 10;
+        }
+
+        window.addEventListener('click', (event) => {
+            // 인트로가 안 끝났으면 클릭 무시!
+            if (!isIntroFinished) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            const infoBox = document.getElementById('info-box');
+            let foundValidTarget = false;
+
+            if (intersects.length > 0) {
+                for (let i = 0; i < intersects.length; i++) {
+                    const hit = intersects[i];
+                    if (isTransparent(hit)) continue; 
+                    let target = hit.object;
+                    if(target.parent.type === 'Group') target = target.parent;
+                    if (target.userData.title) {
+                        // 1. 내용을 먼저 채움
+                        document.getElementById('info-title').innerText = target.userData.title;
+                        document.getElementById('info-desc').innerText = target.userData.description;
+                        
+                        // 2. 박스를 먼저 보여야 크기를 잴 수 있음
+                        infoBox.style.display = 'block';
+
+                        // 3. 화면 밖으로 나가는지 계산 (Math.min 사용)
+                        const padding = 20; // 화면 끝 여백
+                        const boxWidth = infoBox.offsetWidth;
+                        const boxHeight = infoBox.offsetHeight;
+                        const windowWidth = window.innerWidth;
+                        const windowHeight = window.innerHeight;
+
+                        // 계산: (클릭위치+15) 와 (화면끝 - 창크기 - 여백) 중 작은 값 선택
+                        const finalX = Math.min(event.clientX + 15, windowWidth - boxWidth - padding);
+                        const finalY = Math.min(event.clientY + 15, windowHeight - boxHeight - padding);
+
+                        infoBox.style.left = finalX + 'px';
+                        infoBox.style.top = finalY + 'px';
+
+                        infoBox.scrollTop = 0; 
+                        foundValidTarget = true;
+                        break; 
+                    }
+                }
+            }
+            if (!foundValidTarget) infoBox.style.display = 'none';
+        });
+
+        // 6. 애니메이션
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            const time = Date.now() * 0.001;
+            clickableObjects.forEach((group, i) => {
+                group.position.y += Math.sin(time + i) * 0.002;
+                group.rotation.y += group.userData.rotSpeed;
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
